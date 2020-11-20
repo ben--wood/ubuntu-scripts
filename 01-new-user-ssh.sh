@@ -6,7 +6,7 @@ adduser lempadmin
 # grant admin privileges
 usermod -aG sudo lempadmin
 
-# want to access server using ssh keys
+# ideally access server using ssh keys only
  
 # create the key pair on your local machine
 ssh-keygen
@@ -23,7 +23,7 @@ ssh lempadmin@<IP address of server>
 # edit the /etc/ssh/sshd_config file
 sudo nano /etc/ssh/sshd_config
 
-# uncomment this line 
+# uncomment this line: 
 #	PasswordAuthentication no
 
 # restart ssh

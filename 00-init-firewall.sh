@@ -13,5 +13,5 @@ sudo ufw app list
 # allow SSH connections
 sudo ufw allow OpenSSH
 
-# and enable it
+# and enable the firewall
 sudo ufw enable

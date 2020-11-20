@@ -1,28 +1,32 @@
 #!/bin/bash
 
-# create a server block for each website you need to host
-# nginx has a server block enabled by default configured at /var/www/html
-# this works for a single site but is no good for hosting multiple sites
-# so create a new directory under /var/www for each new website you want to host 
-# leave /var/www/html in place as the default site to be served if a request doesn’t match any others
+# install letsencrypt certbot and the nginx plugin
+sudo apt install certbot python3-certbot-nginx
 
-# create the root directory for the new website
-sudo mkdir /var/www/website.com
+# get an SSL cert - follow the prompts 
+sudo certbot --nginx -d website.com -d www.website.com
+# sudo certbot --nginx --agree-tos --redirect --hsts --staple-ocsp --email emailaddress@website.com -d website.com,www.website.com
 
-# assign ownership to the current system user
-sudo chown -R $USER:$USER /var/www/website.com
+# verify ssl certbot auto-Renewal - it'll check twice a day and renew any certificate that is within 30 days of expiring
+sudo service certbot.timer status
 
-# create a new config file here (in nano to save and close the file: CTRL+X then y and ENTER)
+# test it with a dry run
+sudo certbot renew --dry-run
+
+# open the nginx config file for website.com and add a block for ssl configuration below the non-ssl server {...} block
 sudo nano /etc/nginx/sites-available/website.com
 
 #======================================================================
 server {
-    listen 80;
-    listen [::]:80;
-
-    # urls for your website
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
     server_name website.com www.website.com;
-    
+
+    # reference the ssl cert requested above
+    ssl_certificate /etc/letsencrypt/live/website.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/website.com/privkey.pem;
+    ssl_trusted_certificate /etc/letsencrypt/live/website.com/fullchain.pem;
+
     # where the files for your website live
     root /var/www/website.com;
 
@@ -71,6 +75,9 @@ server {
     add_header Content-Security-Policy "default-src 'self'; script-src 'self';";
     add_header Referrer-Policy "no-referrer"; # no referrer header 
     add_header X-Frame-Options "SAMEORIGIN" always; # tries to force the webpage to only be displayed on the same origin (domain) as itself
+        
+    access_log /var/log/website.com.log;
+    error_log /var/log/website.com.error.log;
 
     location ~ /\.ht {
         deny all; # don't want to serve up .htaccess to visitors
