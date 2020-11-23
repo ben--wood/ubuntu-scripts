@@ -9,8 +9,8 @@
 # create the root directory for the new website
 sudo mkdir /var/www/website.com
 
-# assign ownership to the current system user
-sudo chown -R $USER:$USER /var/www/website.com
+# give nginx ownership of the new directory
+sudo chown www-data:www-data /var/www/website.com/ -R
 
 # create a new config file here (in nano to save and close the file: CTRL+X then y and ENTER)
 sudo nano /etc/nginx/sites-available/website.com
